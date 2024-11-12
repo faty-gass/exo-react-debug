@@ -2,16 +2,13 @@
 
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { formatClassname } from "@/lib/utils";
 
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { ModeToggle } from "./mode-toggle";
 import { useTheme } from "./theme-provider";
@@ -47,7 +44,7 @@ const ListItem = React.forwardRef<
       <NavigationMenuLink asChild>
         <a
           ref={ref}
-          className={cn(
+          className={formatClassname(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
@@ -68,7 +65,7 @@ const CodeText = (props: React.ComponentProps<"span">) => {
   return (
     <span
       {...props}
-      className={cn(
+      className={formatClassname(
         props.className,
         "bg-muted text-muted-foreground rounded font-mono text-sm p-1"
       )}

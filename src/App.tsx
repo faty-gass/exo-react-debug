@@ -1,5 +1,6 @@
 import { NavigationMenuDemo } from "./components/NavigationBar";
 import TaskManagerComponent from "./components/TaskManager";
+import "./i18n";
 import { useTranslation } from "react-i18next";
 
 function App() {

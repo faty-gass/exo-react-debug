@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface Task {
+export interface Task {
   id: string;
   content: string;
   creationDate: string;
@@ -54,7 +54,7 @@ const taskSlice = createSlice({
         subTaskId: string;
         content?: string;
         timeSpent?: number;
-        checked?:boolean;
+        checked?: boolean;
       }>
     ) => {
       const task = state.tasks.find(
@@ -65,11 +65,10 @@ const taskSlice = createSlice({
           (subTask) => subTask.id === action.payload.subTaskId
         );
         if (subTask) {
-          if (action.payload.content) subTask.content = action.payload.content;
-          if (action.payload.timeSpent !== undefined)
-            subTask.timeSpent = action.payload.timeSpent ?? 0;
-            if (action.payload.checked !== undefined)
-            task.checked = action.payload.checked;
+          action.payload.content && (subTask.content = action.payload.content);
+          action.payload.timeSpent &&
+            (subTask.timeSpent = action.payload.timeSpent);
+          action.payload.checked && (subTask.checked = action.payload.checked);
         }
       }
     },
@@ -95,9 +94,9 @@ const taskSlice = createSlice({
     updateTask: (
       state,
       action: PayloadAction<{
+        taskId: string;
         estimatedTime?: number;
         description?: string;
-        taskId: string;
         content?: string;
         timeSpent?: number;
         checked?: boolean;
@@ -118,15 +117,35 @@ const taskSlice = createSlice({
           task.checked = action.payload.checked;
       }
     },
-    checkTask: (
+    switchTaskCheck: (state, action: PayloadAction<{ taskId: string }>) => {
+      const task = state.tasks.find(
+        (task) => task.id === action.payload.taskId
+      );
+      if (task) {
+        task.checked = !task.checked;
+        task.checked &&
+          task.subTasks.forEach((subtask) => (subtask.checked = true));
+      }
+    },
+    switchSubTaskCheck: (
       state,
-      action: PayloadAction<{ taskId: string; checked: boolean }>
+      action: PayloadAction<{ taskId: string; subTaskId: string }>
     ) => {
       const task = state.tasks.find(
         (task) => task.id === action.payload.taskId
       );
       if (task) {
-        task.checked = action.payload.checked;
+        const subTask = task.subTasks.find(
+          (subtask) => subtask.id === action.payload.subTaskId
+        );
+        if (subTask) {
+          subTask.checked = !subTask.checked;
+
+          // check task when all subtasks are checked
+          if (task.subTasks.every((subtask) => subtask.checked)) {
+            task.checked = true;
+          }
+        }
       }
     },
   },
@@ -137,7 +156,8 @@ export const {
   removeTask,
   addSubTask,
   updateTask,
-  checkTask,
+  switchTaskCheck,
+  switchSubTaskCheck,
   updateSubTask,
   removeSubTask,
 } = taskSlice.actions;

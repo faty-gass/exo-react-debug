@@ -31,5 +31,5 @@
    ```
 4. You can now use the `@` path alias the same way its used in `shadcn/ui`:
    ```typescript
-   import { cn } from "@/lib/utils";
+   import { formatClassname } from "@/lib/utils";
    ```

@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../store";
 import { updateSubTask, updateTask } from "../taskSlice";
@@ -15,39 +14,33 @@ const Timer: React.FC<TimerProps> = ({ taskId, subTaskId }) => {
   const task = useAppSelector((state) =>
     state.taskManager.tasks.find((task) => task.id === taskId)
   );
-  const subTask = useAppSelector((state) =>
-    state.taskManager.tasks
-      .find((task) => task.id === taskId)
-      ?.subTasks.find((subTask) => subTask.id === subTaskId)
-  );
+  const subTask = task?.subTasks.find((task) => task?.id === subTaskId);
 
   const [isActive, setIsActive] = useState(false);
-  let instance = task;
-  if (subTask) {
-    instance = subTask;
-  }
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    if (isActive) {
+    if (task && isActive) {
       interval = setInterval(() => {
-        const newSeconds = (instance?.timeSpent || 0) + 1;
-        if (subTask && subTaskId) {
+        if (subTaskId && subTask) {
+          const newSecondSubtask = subTask.timeSpent + 1;
           dispatch(
             updateSubTask({
               taskId: taskId,
               subTaskId: subTaskId,
+              timeSpent: newSecondSubtask,
+            })
+          );
+        } else {
+          const newSeconds = task.timeSpent + 1;
+          dispatch(
+            updateTask({
+              taskId,
               timeSpent: newSeconds,
             })
           );
         }
-        dispatch(
-          updateTask({
-            taskId,
-            timeSpent: newSeconds,
-          })
-        );
       }, 1000);
     } else if (!isActive && interval) {
       clearInterval(interval);
@@ -56,19 +49,23 @@ const Timer: React.FC<TimerProps> = ({ taskId, subTaskId }) => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, dispatch, taskId, subTaskId]);
+  }, [isActive, dispatch, taskId, subTaskId, subTask, task]);
 
-  const seconds = instance?.timeSpent || 0;
+  const seconds = (subTaskId ? subTask?.timeSpent : task?.timeSpent) ?? 0;
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
 
   const formattedMinutes = String(minutes).padStart(2, "0");
   const formattedSeconds = String(remainingSeconds).padStart(2, "0");
 
+  const switchButton = useCallback(() => {
+    setIsActive((state) => !state);
+  }, []);
+
   return (
     <Button
       variant={isActive ? "destructive" : "default"}
-      onClick={() => setIsActive(!isActive)}
+      onClick={switchButton}
     >
       {isActive
         ? `${formattedMinutes}:${formattedSeconds}`

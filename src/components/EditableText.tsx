@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ChangeEvent, useCallback, useState } from "react";
 import { Input } from "./ui/input";
 
 interface EditableTextProps {
@@ -15,24 +15,27 @@ const EditableText: React.FC<EditableTextProps> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editableText, setEditableText] = useState<string>(text);
 
-  const handleTextClick = () => {
+  const handleTextClick = useCallback(() => {
     setIsEditing(true);
-  };
+  }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setEditableText(e.target.value);
-  };
+  }, []);
 
-  const handleInputBlur = () => {
+  const handleInputBlur = useCallback(() => {
     setIsEditing(false);
     onTextChange(editableText);
-  };
+  }, [editableText, onTextChange]);
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.currentTarget.blur();
-    }
-  };
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.currentTarget.blur();
+      }
+    },
+    []
+  );
 
   return (
     <>
